@@ -1,36 +1,67 @@
-body {
-    font-family: "Times New Roman", Times, serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f4f4;
-    margin: 0;
-}
+document.addEventListener("DOMContentLoaded", () => {
+    const table = document.getElementById("time-blocking-table");
+    let isSelecting = false;
+    let selectedCells = new Set();
 
-table {
-    width: 80%;
-    border-collapse: collapse;
-    background: white;
-    border: 3px solid sagegreen;
-}
+    table.addEventListener("mousedown", (event) => {
+        if (event.button === 0) { // Left-click to select multiple cells
+            isSelecting = true;
+            selectedCells.clear();
+            table.querySelectorAll("td").forEach(cell => cell.style.backgroundColor = "");
+        }
+    });
 
-th, td {
-    border: 3px solid sagegreen;
-    padding: 10px;
-    text-align: left;
-}
+    table.addEventListener("mousemove", (event) => {
+        if (isSelecting && event.target.tagName === "TD") {
+            event.target.style.backgroundColor = "lightblue";
+            selectedCells.add(event.target);
+        }
+    });
 
-th {
-    text-align: center;
-    background-color: #ddd;
-}
+    table.addEventListener("mouseup", () => {
+        isSelecting = false;
+    });
 
-td:first-child {
-    text-align: right;
-}
+    table.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        let target = event.target;
 
-.resize {
-    resize: both;
-    overflow: auto;
-}
+        if (target.tagName === "TD") {
+            const menu = document.createElement("div");
+            menu.className = "context-menu";
+            menu.style.top = `${event.clientY}px`;
+            menu.style.left = `${event.clientX}px`;
+            document.body.appendChild(menu);
+
+            const colorOption = document.createElement("div");
+            colorOption.innerText = "Change Color";
+            colorOption.onclick = () => {
+                let colorPicker = document.createElement("input");
+                colorPicker.type = "color";
+                colorPicker.oninput = (e) => {
+                    selectedCells.forEach(cell => cell.style.backgroundColor = e.target.value);
+                };
+                colorPicker.onblur = () => menu.remove();
+                menu.appendChild(colorPicker);
+                colorPicker.click();
+            };
+            menu.appendChild(colorOption);
+
+            const mergeOption = document.createElement("div");
+            mergeOption.innerText = "Merge Cells";
+            mergeOption.onclick = () => {
+                if (selectedCells.size > 1) {
+                    let firstCell = [...selectedCells][0];
+                    firstCell.rowSpan = selectedCells.size;
+                    selectedCells.forEach((cell, index) => {
+                        if (index > 0) cell.remove();
+                    });
+                }
+                menu.remove();
+            };
+            menu.appendChild(mergeOption);
+
+            document.body.addEventListener("click", () => menu.remove(), { once: true });
+        }
+    });
+});
