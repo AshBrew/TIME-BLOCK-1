@@ -34,3 +34,21 @@ td:first-child {
     resize: both;
     overflow: auto;
 }
+
+.context-menu {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 5px;
+    z-index: 1000;
+}
+
+.context-menu div {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.context-menu div:hover {
+    background: #ddd;
+}
